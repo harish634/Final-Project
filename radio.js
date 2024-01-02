@@ -85,6 +85,7 @@ const checkboxContainer = document.getElementById('checkboxContainer');
 
 // Function to create and append checkboxes
 function createGenreCheckbox(genre) {
+  console.log('inside creategenrescheckbox');
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.value = genre.id;
@@ -107,28 +108,6 @@ genresSet.forEach(genreString => {
     createGenreCheckbox(genre);
 });
 
-document.getElementById('decadeDropdown').addEventListener('change', function () {
-  const selectedDecade = this.value;
-  const selectedCategory = document.querySelector('input[name="category"]:checked') ?
-    document.querySelector('input[name="category"]:checked').value :
-    null;
-
-  const selectedGenres = Array.from(document.querySelectorAll('input[name="genres"]:checked'))
-    .map(checkbox => parseInt(checkbox.value));
-
-  let filteredMovies;
-
-  if (selectedCategory === 'hindi') {
-    filteredMovies = filterMoviesByDecade(hindiMovies, selectedDecade);
-  } else if (selectedCategory === 'international') {
-    filteredMovies = filterMoviesByDecade(movies, selectedDecade);
-  } else {
-    filteredMovies = filterMoviesByDecade(joinMovie, selectedDecade);
-  }
-  getMovieInformation(filteredMovies);
-});
-
-
 
 document.querySelectorAll('input[name="category"]').forEach(radioButton => {
   radioButton.addEventListener('change', () => {
@@ -140,6 +119,7 @@ document.querySelectorAll('input[name="category"]').forEach(radioButton => {
 document.querySelectorAll('input[name="genres"]').forEach(checkbox => {
   checkbox.addEventListener('change', () => {
     updateMovieOptions();
+    console.log();
   });
 });
 
@@ -153,6 +133,7 @@ document.getElementById('decadeDropdown').addEventListener('change', function ()
   updateMovieOptions();
 });
 
+
 function updateMovieOptions() {
   const selectedDecade = document.getElementById('decadeDropdown').value;
   const selectedCategory = document.querySelector('input[name="category"]:checked') ?
@@ -161,22 +142,26 @@ function updateMovieOptions() {
 
   const selectedGenres = Array.from(document.querySelectorAll('input[name="genres"]:checked'))
     .map(checkbox => parseInt(checkbox.value));
+    console.log(selectedGenres);
 
   const logicalOperator = document.querySelector('input[name="logicalOperator"]:checked') ?
     document.querySelector('input[name="logicalOperator"]:checked').value :
     'AND';
 
-  let filteredMovies;
+  // Set default value for filteredMovies to include all movies
+  let filteredMovies = joinMovie;
 
   if (selectedCategory === 'hindi') {
     filteredMovies = filterMoviesByDecade(hindiMovies, selectedDecade);
   } else if (selectedCategory === 'international') {
     filteredMovies = filterMoviesByDecade(movies, selectedDecade);
-  } else {
+  } else if (selectedDecade) {
+    // Only apply decade filter if a decade is selected and no specific category
     filteredMovies = filterMoviesByDecade(joinMovie, selectedDecade);
   }
 
   if (selectedGenres.length > 0) {
+    // Apply genre filter if genres are selected
     filteredMovies = filteredMovies.filter(movie => {
       if (logicalOperator === 'AND') {
         return selectedGenres.every(genreId =>
@@ -194,6 +179,9 @@ function updateMovieOptions() {
   displayMoviesInContainer(filteredMovies);
   getMovieInformation(filteredMovies);
 }
+
+
+
 function displayMoviesInDropdown(filteredMovies) {
 const select = document.getElementById('movieTitlesContainer');
 select.innerHTML = "";
@@ -345,7 +333,7 @@ function getCastHtml(cast) {
   castHtml += '</div>';
   return castHtml;
 }
- 
+
 
 function displayMovies() {
   const selectedGenres = Array.from(document.querySelectorAll('input[name="genres"]:checked'))

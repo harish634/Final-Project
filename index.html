@@ -68,6 +68,16 @@
                         </div>
                     </div>
                     <div class="col">
+                        <button id="toggleDecadeBtn" class="btn btn-link">Toggle Decade <span id="arrowIcon">&#x25B6;</span></button>
+                        <div id="decadeSection" class="form-group" style="display: none;">
+                            <label for="decadeDropdown" id="decadeLabel">Select Decade:</label>
+                            <select id="decadeDropdown" class="form-control">
+                                <option>Select Year</option>
+                                <!-- Decades will be populated here dynamically -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col">
                         <button id="toggleGenresBtn" class="btn btn-link">Toggle Genres <span id="arrowIcon">&#x25B6;</span></button>
                         <div id="genresSection" class="form-group" style="display: none;">
                             <label>
@@ -79,15 +89,7 @@
                             <div id="checkboxContainer" class="checkbox-container genresValue"></div>
                         </div>
                     </div>
-                    <div class="col">
-                        <button id="toggleDecadeBtn" class="btn btn-link">Toggle Decade <span id="arrowIcon">&#x25B6;</span></button>
-                        <div id="decadeSection" class="form-group" style="display: none;">
-                            <label for="decadeDropdown" id="decadeLabel">Select Decade:</label>
-                            <select id="decadeDropdown" class="form-control">
-                                <!-- Decades will be populated here dynamically -->
-                            </select>
-                        </div>
-                    </div>
+                    
                     </div>
                 </div>
             </div>
