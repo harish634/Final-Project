@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Movie Website</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon-img.png">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
+    <style>
+        .moviePoster {
+            max-width: 500px;
+            max-height: 400px;
+        }
+
+        .checkbox-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .search-container {
+            margin-top: 20px;
+        }
+
+        #arrowIcon {
+            transition: transform 0.3s;
+        }
+
+        #genresSection {
+            overflow: hidden;
+            transition: height 0.3s;
+        }
+        #languageSection {
+          overflow: hidden;
+          transition: height 0.3s;
+      }
+      #decadeSection {
+        overflow: hidden;
+        transition: height 0.3s;
+    }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="header text-center">
+            <h1>Movie Website</h1>
+        </div>
+
+        <div id="content" class="mt-4">
+            <div class="row">
+                <div class="col-md-6">
+                  <button id="toggleLanguageBtn" class="btn btn-link">Toggle language <span id="arrowIcon">&#x25B6;</span></button>
+                  <div id="languageSection" class="form-group" style="display: none;">
+                      <div class="form-check">
+                        <input class="form-check-input" type="radio" name="category" value="hindi">
+                        <label class="form-check-label">Hindi Movies</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="category" value="international">
+                        <label class="form-check-label">International Movies</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="category" value="all">
+                        <label class="form-check-label">All Movies</label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                    <h3>Search</h3>
+                    <div class="search-container">
+                        <input id="searchInput" class="form-control" type="text" onchange="searchMovies()" placeholder="Search movie or cast names...">
+                        <div class="scrollable-box">
+                            <div id="suggestionsContainer" class="suggestions-container"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-12">
+                    <button id="toggleGenresBtn" class="btn btn-link">Toggle Genres <span id="arrowIcon">&#x25B6;</span></button>
+                    <div id="genresSection" class="form-group" style="display: none;">
+                        <label>
+                            <input type="radio" name="logicalOperator" value="AND" checked> AND
+                        </label>
+                        <label>
+                            <input type="radio" name="logicalOperator" value="OR"> OR
+                        </label>
+                        <div id="checkboxContainer" class="checkbox-container"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                  <button id="toggleDecadeBtn" class="btn btn-link">Toggle Decade <span id="arrowIcon">&#x25B6;</span></button>
+                    <div id="decadeSection" class="form-group" style="display: none;">
+                        <label for="decadeDropdown">Select Decade:</label>
+                        <select id="decadeDropdown" class="form-control">
+                            <!-- Decades will be populated here dynamically -->
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <select id="movieTitlesContainer" class="form-control" onchange="movieSelected()">
+                        <option>Select the Movie</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <h1 id="title" class="mt-3"></h1>
+                    <div id="overview"></div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div id="moviePoster"></div>
+                </div>
+                <div class="col-md-8">
+                    <div id="castInfo"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="resultContainer" class="mt-4">
+            <!-- Result container for displaying movie information -->
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.8/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <script src="./radio.js"></script>
+
+    <script>
+        document.getElementById('toggleGenresBtn').addEventListener('click', function () {
+            const genresSection = document.getElementById('genresSection');
+            const arrowIcon = document.getElementById('arrowIcon');
+            
+            if (genresSection.style.display === 'none') {
+                genresSection.style.display = 'block';
+                genresSection.style.height = 'auto';
+                arrowIcon.style.transform = 'rotate(90deg)';
+            } else {
+                genresSection.style.display = 'none';
+                genresSection.style.height = '0';
+                arrowIcon.style.transform = 'rotate(0deg)';
+            }
+        });
+        document.getElementById('toggleLanguageBtn').addEventListener('click', function () {
+          const genresSection = document.getElementById('languageSection');
+          const arrowIcon = document.getElementById('arrowIcon');
+          
+          if (genresSection.style.display === 'none') {
+              genresSection.style.display = 'block';
+              genresSection.style.height = 'auto';
+              arrowIcon.style.transform = 'rotate(90deg)';
+          } else {
+              genresSection.style.display = 'none';
+              genresSection.style.height = '0';
+              arrowIcon.style.transform = 'rotate(0deg)';
+          }
+      });
+      document.getElementById('toggleDecadeBtn').addEventListener('click', function () {
+        const genresSection = document.getElementById('decadeSection');
+        const arrowIcon = document.getElementById('arrowIcon');
+        
+        if (genresSection.style.display === 'none') {
+            genresSection.style.display = 'block';
+            genresSection.style.height = 'auto';
+            arrowIcon.style.transform = 'rotate(90deg)';
+        } else {
+            genresSection.style.display = 'none';
+            genresSection.style.height = '0';
+            arrowIcon.style.transform = 'rotate(0deg)';
+        }
+    });
+    </script>
+</body>
+</html>
