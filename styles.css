@@ -202,3 +202,28 @@
   #suggestionsContainer{
     color: antiquewhite;
   }
+  body, html {
+    margin: 0;
+    padding: 0;
+}
+
+#websiteTitle {
+    color: antiquewhite;
+    font-family: 'Times New Roman', Times, serif;
+}
+
+.container {
+    padding-right: 0;
+    padding-left: 0;
+}
+
+#movieDrop {
+    margin-top: 20px;
+    padding: 5px;
+    margin-left: auto; /* Move the dropdown to the right side */
+    width: 100%; /* Take full width of its container */
+    max-width: 500px; /* Set a maximum width if needed */
+}
+#note{
+  color: green;
+}

@@ -1,9 +1,9 @@
 let data;
 let movies;
-let  movieIds;
+let movieIds;
 let hindiMovies;
 let selectedCastName;
-let joinMovie
+let joinMovie;
 let simplifiedMovies;
 let combinedData;
 const personUrl = 'https://api.themoviedb.org/3/person/';
@@ -17,54 +17,19 @@ import('./src/moviesPlay.js').then(res => {
   data = res;
   console.log(data);
   run();
-  displayMovies()
+  displayMovies();
   var castData = data.castData;
   console.log('castData:', castData);
-  let combineMovie = data.movies.concat(data.hindiMovies);
-  simplifiedMovies = combineMovie.map(movie => ({
-      name: movie.title,
-      id: movie.tmdbId
+  let joinMovie = data.movies.concat(data.hindiMovies);
+  simplifiedMovies = joinMovie.map(movie => ({
+    name: movie.title,
+    id: movie.tmdbId
   }));
   console.log(simplifiedMovies);
   combinedData = castData.concat(simplifiedMovies);
   console.log(combinedData);
 
-})
-document.addEventListener('DOMContentLoaded', function () {
-  var searchInput = document.getElementById('searchInput');
-  var suggestionsContainer = document.getElementById('suggestionsContainer');
-   
-  searchInput.addEventListener('input', function () {
-     var searchTerm = searchInput.value.toLowerCase();
-     if (searchTerm.length >= 3) {
-      var filteredCast = combinedData.filter(function (castMember) {
-          return castMember.name.toLowerCase().includes(searchTerm);
-      });
-      displaySuggestions(filteredCast);
-  } else {
-      // Clear suggestions if the input length is less than 3
-      suggestionsContainer.innerHTML = '';
-  }
-  });
-   
-  function displaySuggestions(suggestions) {
-     suggestionsContainer.innerHTML = '';
-   
-     suggestions.forEach(function (castMember) {
-        var suggestionDiv = document.createElement('div');
-        suggestionDiv.classList.add('suggestion');
-        suggestionDiv.textContent = castMember.name;
-   
-        suggestionDiv.addEventListener('click', function () {
-        selectedCastName = castMember.name;
-        console.log('selected cast name is : ',selectedCastName);
-        searchInput.value = selectedCastName ;
-        suggestionsContainer.innerHTML = '';
-        });
-        suggestionsContainer.appendChild(suggestionDiv);
-     });
-  }
-  });
+});
 
 function run() {
   joinMovie = data.movies.concat(data.hindiMovies);
@@ -76,21 +41,21 @@ function run() {
   for (let index = 0; index < joinMovie.length; index++) {
     const k = joinMovie[index].genres;
     for (let j = 0; j < k.length; j++) {
-        genresSet.add(JSON.stringify(k[j]));
+      genresSet.add(JSON.stringify(k[j]));
     }
   }
 
-// Get the container element where checkboxes will be appended
-const checkboxContainer = document.getElementById('checkboxContainer');
+  // Get the container element where checkboxes will be appended
+  const checkboxContainer = document.getElementById('checkboxContainer');
 
-// Function to create and append checkboxes
-function createGenreCheckbox(genre) {
-  console.log('inside creategenrescheckbox');
+  // Function to create and append checkboxes
+  function createGenreCheckbox(genre) {
+    console.log('inside creategenrescheckbox');
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.value = genre.id;
     checkbox.id = `genre-${genre.id}`;
-    checkbox.name = 'genres'; 
+    checkbox.name = 'genres';
 
     const label = document.createElement('label');
     label.htmlFor = `genre-${genre.id}`;
@@ -100,39 +65,57 @@ function createGenreCheckbox(genre) {
     checkboxContainer.appendChild(checkbox);
     checkboxContainer.appendChild(label);
     checkboxContainer.appendChild(document.createElement('br')); // Add line break for better spacing
-}
+  }
 
-// Using forEach to iterate over the set
-genresSet.forEach(genreString => {
+  // Using forEach to iterate over the set
+  genresSet.forEach(genreString => {
     const genre = JSON.parse(genreString);
     createGenreCheckbox(genre);
-});
-
-
-document.querySelectorAll('input[name="category"]').forEach(radioButton => {
-  radioButton.addEventListener('change', () => {
-    displayMovies();
-    updateMovieOptions();
   });
-});
 
-document.querySelectorAll('input[name="genres"]').forEach(checkbox => {
-  checkbox.addEventListener('change', () => {
-    updateMovieOptions();
-    console.log();
+  document.querySelectorAll('input[name="category"]').forEach(radioButton => {
+    radioButton.addEventListener('change', () => {
+      displayMovies();
+      updateMovieOptions();
+    });
   });
-});
 
-document.querySelectorAll('input[name="logicalOperator"]').forEach(radioButton => {
-  radioButton.addEventListener('change', () => {
-    updateMovieOptions();
+  document.querySelectorAll('input[name="genres"]').forEach(checkbox => {
+    checkbox.addEventListener('change', () => {
+      updateMovieOptions();
+    });
   });
-});
+
+  document.querySelectorAll('input[name="logicalOperator"]').forEach(radioButton => {
+    radioButton.addEventListener('change', () => {
+      updateMovieOptions();
+    });
+  });
 }
+
 document.getElementById('decadeDropdown').addEventListener('change', function () {
   updateMovieOptions();
 });
 
+function displayMovies() {
+
+  const selectedCategory = document.querySelector('input[name="category"]:checked') ?
+    document.querySelector('input[name="category"]:checked').value :
+    null;
+
+  let selectedMovies;
+
+  if (selectedCategory === 'hindi') {
+    selectedMovies = hindiMovies;
+  } else if (selectedCategory === 'international') {
+    selectedMovies = movies;
+  } else {
+    selectedMovies = hindiMovies.concat(movies);
+  }
+
+  displayMoviesInDropdown(selectedMovies);
+  getMovieInformation(selectedMovies);
+}
 
 function updateMovieOptions() {
   const selectedDecade = document.getElementById('decadeDropdown').value;
@@ -142,24 +125,20 @@ function updateMovieOptions() {
 
   const selectedGenres = Array.from(document.querySelectorAll('input[name="genres"]:checked'))
     .map(checkbox => parseInt(checkbox.value));
-    console.log(selectedGenres);
 
   const logicalOperator = document.querySelector('input[name="logicalOperator"]:checked') ?
     document.querySelector('input[name="logicalOperator"]:checked').value :
     'AND';
 
-  // Set default value for filteredMovies to include all movies
-  let filteredMovies = joinMovie;
-
+  let filteredMovies;
+  // Apply decade filter if a decade is selected
   if (selectedCategory === 'hindi') {
     filteredMovies = filterMoviesByDecade(hindiMovies, selectedDecade);
   } else if (selectedCategory === 'international') {
     filteredMovies = filterMoviesByDecade(movies, selectedDecade);
-  } else if (selectedDecade) {
-    // Only apply decade filter if a decade is selected and no specific category
+  } else {
     filteredMovies = filterMoviesByDecade(joinMovie, selectedDecade);
   }
-
   if (selectedGenres.length > 0) {
     // Apply genre filter if genres are selected
     filteredMovies = filteredMovies.filter(movie => {
@@ -180,30 +159,57 @@ function updateMovieOptions() {
   getMovieInformation(filteredMovies);
 }
 
-
-
 function displayMoviesInDropdown(filteredMovies) {
-const select = document.getElementById('movieTitlesContainer');
-select.innerHTML = "";
+  const select = document.getElementById('movieTitlesContainer');
+  select.innerHTML = "";
 
-const defaultOption = document.createElement("option");
-defaultOption.value = 0;
-defaultOption.text = "Select A Movie";
-select.add(defaultOption);
+  const defaultOption = document.createElement("option");
+  defaultOption.value = 0;
+  defaultOption.text = "Select A Movie";
+  select.add(defaultOption);
 
-filteredMovies.forEach(movie => {
-  const option = document.createElement("option");
-  option.value = movie.tmdbId;
-  option.text = `${movie.title}`;
-  select.add(option);
-});
+  filteredMovies.forEach(movie => {
+    const option = document.createElement("option");
+    option.value = movie.tmdbId;
+    option.text = `${movie.title}`;
+    select.add(option);
+  });
 
-$('#movieTitlesContainer').select2({
-  placeholder: "Search for a movie ",
-  allowClear: true,
-  width: "100%",
-});
+  const selectedCategory = document.querySelector('input[name="category"]:checked') ?
+    document.querySelector('input[name="category"]:checked').value :
+    null;
+
+  // Use the selectedGenres to determine if genres are selected
+  const selectedGenres = Array.from(document.querySelectorAll('input[name="genres"]:checked'))
+    .map(checkbox => parseInt(checkbox.value));
+
+  if (selectedGenres.length === 0) {
+    let dropdownOptions;
+    if (selectedCategory === 'hindi') {
+      dropdownOptions = hindiMovies;
+    } else if (selectedCategory === 'international') {
+      dropdownOptions = movies;
+    } else {
+      // Default to combined movies if no specific category is selected
+      dropdownOptions = hindiMovies.concat(movies);
+    }
+
+    // Display movies based on the selected language in the dropdown
+    dropdownOptions.forEach(movie => {
+      const option = document.createElement("option");
+      option.value = movie.tmdbId;
+      option.text = `${movie.title}`;
+      select.add(option);
+    });
+  }
+
+  $('#movieTitlesContainer').select2({
+    placeholder: "Search for a movie ",
+    allowClear: true,
+    width: "100%",
+  });
 }
+
 function getMovieInformation(selectedMovies) {
   const movieIds = selectedMovies.map(movie => movie.tmdbId);
 
@@ -237,7 +243,7 @@ function getMovieInformation(selectedMovies) {
 function displayMoviesInContainer(movies) {
   let resultContainer = '<br/><div class="ui link cards">';
   const movieCards = movies.reduce((html, movie) => {
-       return html + `
+    return html + `
       <div class="card" id="card">
         <div class="image">
         <img id='moviePicture' src='${imageUrl}${movie.posterPath}' />
@@ -269,31 +275,31 @@ async function movieSelected() {
   movie = data.hindiMovies.find(movie => movieId === movie.tmdbId) || data.movies.find(movie => movieId === movie.tmdbId);
 
   if (!movie) {
-      console.error("Movie not found");
-      return;
+    console.error("Movie not found");
+    return;
   }
 
   const fetchArray = movie.cast.map(cm =>
-      fetch(`${personUrl}${cm.id}?api_key=${apiKey}`)
-          .then(response => response.json())
+    fetch(`${personUrl}${cm.id}?api_key=${apiKey}`)
+      .then(response => response.json())
   );
 
   fetchArray.unshift(fetch(`${movieUrl}${movieId}?api_key=${apiKey}`)
-      .then(response => response.json()));
+    .then(response => response.json()));
 
   const fetchResponse = await Promise.all(fetchArray);
 
   const movieInfo = {
-      title: fetchResponse[0].title,
-      overview: fetchResponse[0].overview,
-      posterPath: fetchResponse[0].poster_path,
-      cast: movie.cast.map((cm, i) => ({
-          id: cm.id,
-          character: cm.character,
-          name: cm.name,
-          birthDate: fetchResponse[i + 1].birthday,
-          profileImage: fetchResponse[i + 1].profile_path,
-      }))
+    title: fetchResponse[0].title,
+    overview: fetchResponse[0].overview,
+    posterPath: fetchResponse[0].poster_path,
+    cast: movie.cast.map((cm, i) => ({
+      id: cm.id,
+      character: cm.character,
+      name: cm.name,
+      birthDate: fetchResponse[i + 1].birthday,
+      profileImage: fetchResponse[i + 1].profile_path,
+    }))
   };
 
   populateMovieHtml(movieInfo);
@@ -301,7 +307,6 @@ async function movieSelected() {
   // Open the Bootstrap modal
   $('#movieModal').modal('show');
 }
-
 
 function populateMovieHtml(movieInfo) {
   document.getElementById('title').innerHTML = movieInfo.title;
@@ -334,60 +339,46 @@ function getCastHtml(cast) {
   return castHtml;
 }
 
+document.addEventListener('DOMContentLoaded', function () {
+  var searchInput = document.getElementById('searchInput');
+  var suggestionsContainer = document.getElementById('suggestionsContainer');
 
-function displayMovies() {
-  const selectedGenres = Array.from(document.querySelectorAll('input[name="genres"]:checked'))
-    .map(checkbox => parseInt(checkbox.value));
+  searchInput.addEventListener('input', function () {
+    var searchTerm = searchInput.value.toLowerCase();
+    if (searchTerm.length >= 3) {
+      var filteredCast = combinedData.filter(function (castMember) {
+        return castMember.name.toLowerCase().includes(searchTerm);
+      });
+      displaySuggestions(filteredCast);
+    } else {
+      // Clear suggestions if the input length is less than 3
+      suggestionsContainer.innerHTML = '';
+    }
+  });
 
-  const selectedCategory = document.querySelector('input[name="category"]:checked') ?
-    document.querySelector('input[name="category"]:checked').value :
-    null;
+  function displaySuggestions(suggestions) {
+    suggestionsContainer.innerHTML = '';
 
-  const logicalOperator = document.querySelector('input[name="logicalOperator"]:checked') ?
-    document.querySelector('input[name="logicalOperator"]:checked').value :
-    'AND';
+    suggestions.forEach(function (castMember) {
+      var suggestionDiv = document.createElement('div');
+      suggestionDiv.classList.add('suggestion');
+      suggestionDiv.textContent = castMember.name;
 
-  let selectedMovies;
-
-  if (selectedCategory === 'hindi') {
-    selectedMovies = hindiMovies;
-  } else if (selectedCategory === 'international') {
-    selectedMovies = movies;
-  } else {
-    selectedMovies = hindiMovies.concat(movies);
-  }
-
-  let filteredMovies;
-
-  if (selectedGenres.length > 0) {
-    // Filter movies by genres only if genres are selected
-    filteredMovies = selectedMovies.filter(movie => {
-      if (logicalOperator === 'AND') {
-        return selectedGenres.every(genreId =>
-          movie.genres.some(movieGenre => movieGenre.id === genreId)
-        );
-      } else {
-        return selectedGenres.some(genreId =>
-          movie.genres.some(movieGenre => movieGenre.id === genreId)
-        );
-      }
+      suggestionDiv.addEventListener('click', function () {
+        selectedCastName = castMember.name;
+        console.log('selected cast name is : ', selectedCastName);
+        searchInput.value = selectedCastName;
+        suggestionsContainer.innerHTML = '';
+      });
+      suggestionsContainer.appendChild(suggestionDiv);
     });
-  } else {
-    // If no genres are selected, use all movies based on the selected category
-    filteredMovies = selectedMovies;
   }
+});
 
-  displayMoviesInDropdown(filteredMovies);
-  displayMoviesInContainer(filteredMovies);
-  getMovieInformation(filteredMovies);
-}
 function searchMovies() {
-  // Get the search input value
   const searchValue = document.getElementById('searchInput').value.toLowerCase();
 
-  // Filter movies based on the search value
   const filteredEnglishMovies = data.movies.filter(movie => {
-    // Check if the search value matches the movie title or any cast name
     return (
       movie.title.toLowerCase().includes(searchValue) ||
       movie.cast.some(actor => actor.name.toLowerCase().includes(searchValue))
@@ -395,7 +386,6 @@ function searchMovies() {
   });
 
   const filteredHindiMovies = data.hindiMovies.filter(movie => {
-    // Check if the search value matches the movie title or any cast name
     return (
       movie.title.toLowerCase().includes(searchValue) ||
       movie.cast.some(actor => actor.name.toLowerCase().includes(searchValue))
@@ -403,14 +393,10 @@ function searchMovies() {
   });
 
   const filteredMovies = filteredHindiMovies.concat(filteredEnglishMovies);
-
-  // Display the search results
   movieIds = filteredMovies.map(movie => movie.tmdbId);
 
-  // Call getMovieInformation with the filtered movies
   getMovieInformation(filteredMovies);
 }
-
 
 function getDecadesArray(joinMovie) {
   const decadesSet = new Set();
